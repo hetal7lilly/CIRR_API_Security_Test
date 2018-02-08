@@ -1,0 +1,173 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Template
+host: localhost:8080
+basePath: /api/
+# 
+schemes:
+  - http
+  - https
+produces:
+  - application/json
+securityDefinitions:
+  APIKey:
+    description: "Access Token (JWT) from Ping"
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    x-audience: "EIM_SOA_Gateways"
+paths:
+  /template:
+    x-swagger-router-controller: api-controller
+    options:
+      produces:
+        - application/json
+      description: Returns the Open API Specification for this call.
+      operationId: options
+      responses:
+        '200':
+          description: Returns Open API Specification for the call as json.
+          schema:
+            type: string
+            format: open-api-specification
+        '500':
+          description: Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    get:
+      produces: 
+        - application/json
+      security:
+        - APIKey: []
+      summary: Gets table in
+      description: Returns table information
+      operationId: get
+      parameters:
+        - $ref: '#/parameters/fields'
+        - $ref: '#/parameters/sort'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/accept-encoding'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/TableDataCollection'
+          headers:
+            X-Pagination-Limit:
+              type: integer
+              description: The maximum number of records returned for pagination.
+            X-Pagination-Index:
+              type: integer
+              description: The page index for pagination. This is 1 based.
+            X-Pagination-Count:
+              type: integer
+              description: The total record count.
+        '403':
+          $ref: '#/responses/403Forbidden'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+      details:
+        type: string
+  TableData:
+    required:
+      - tableName
+    properties:
+      tableName:
+        type: string
+        description: The table name.
+      comments:
+        type: ["string","null"]
+        description: comments.
+      recordIndex:
+        type: integer
+        description: The record index.  This is present in collections.
+    example:
+      tableName: MyTable
+      comments: Some comments here
+  TableDataCollection:
+    type: array
+    items:
+      $ref: '#/definitions/TableData'
+    example:
+      - tableName: MyTable
+        comments: Some comments here
+        recordIndex: 1
+      - tableName: MyOtherTable
+        comments: Some more comments
+        recordIndex: 2
+  Message:
+    type: object
+    properties:
+      message:
+        type: string
+parameters:
+  page:
+    name: page_index
+    in: query
+    description: Current page number
+    required: false
+    type: integer
+    format: int32
+    default: 1
+    minimum: 1
+  limit:
+    name: page_limit
+    in: query
+    description: 'Limits the number of returned items per page (Default min:1 , max 300)'
+    required: false
+    type: integer
+    format: int32
+    default: 300
+    minimum: 1
+    maximum: 300
+  sort:
+    name: sort
+    in: query
+    description: Field names of the object to be sorted
+    required: false
+    uniqueItems: true
+    minItems: 1
+    maxItems: 2
+    type: array
+    collectionFormat: csv
+    items:
+      type: string
+      pattern: '(^[a-zA-Z,-]+$){1}(\,^[a-zA-Z,-]+$){0,5}'
+  fields:
+    name: fields
+    in: query
+    description: Field names of the object to be returned
+    required: false
+    uniqueItems: true
+    minItems: 1
+    maxItems: 1
+    type: array
+    collectionFormat: csv
+    items:
+      type: string
+      pattern: '(^[a-zA-Z,]+$){1}(\,^[a-zA-Z,]+$){0,5}'
+  accept-encoding:
+    name: accept-encoding
+    in: header
+    description: Supported response encoding values are gzip and identity (no compression). Gzip is the default if missing.
+    required: false
+    type: string  
+responses:
+  403Forbidden:
+    description: The request is understood, but it has been refused or access is not allowed.
+    schema:
+      $ref: '#/definitions/Message'
