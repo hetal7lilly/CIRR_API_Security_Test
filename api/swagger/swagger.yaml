@@ -18,7 +18,7 @@ securityDefinitions:
     in: "header"
     x-audience: "EIM_SOA_Gateways"
 paths:
-  /template:
+  /api-security:
     x-swagger-router-controller: api-controller
     options:
       produces:
