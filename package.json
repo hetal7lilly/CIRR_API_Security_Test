@@ -11,7 +11,7 @@
   "license": "",
   "main": "app.js",
   "dependencies": {
-    "lilly-api-oracle-accelerator": "^1.0.0",
+    "lilly-api-oracle-accelerator": "^1.0.12",
     "restify": "^4.0.2",
     "swagger-restify-mw": "^0.1.0"
   },
